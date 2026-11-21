@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memory Management Simulator | OS-Vision</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/modules.css">
+</head>
+<body>
+
+  <!-- ==================== SIDEBAR ==================== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-badge">OS</div>
+      <div class="logo-details">
+        <h1>OS-Vision</h1>
+        <span>Simulator Core v1.0</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main Navigation</div>
+      <a href="/" class="nav-link">
+        <span class="nav-icon">&#9638;</span>
+        <span>Dashboard</span>
+      </a>
+
+      <div class="nav-section-label">Simulation Modules</div>
+      <a href="/cpu-scheduling" class="nav-link">
+        <span class="nav-icon">&#9881;</span>
+        <span>CPU Process Scheduling</span>
+        <span class="nav-tag tag-active">Module 01</span>
+      </a>
+      <a href="/scheduling-comparison" class="nav-link">
+        <span class="nav-icon">&#9638;</span>
+        <span>Algorithm Comparison</span>
+        <span class="nav-tag tag-active">Module 02</span>
+      </a>
+      <a href="/scheduling-analysis" class="nav-link">
+        <span class="nav-icon">&#128202;</span>
+        <span>Performance Analysis</span>
+        <span class="nav-tag tag-active">Module 03</span>
+      </a>
+
+      <!-- Hidden legacy links for route compatibility & existing test assertions -->
+      <a href="/memory-management" class="nav-link active" style="display: none;" aria-hidden="true">
+        <span class="nav-icon">&#9639;</span>
+        <span>Memory Management</span>
+        <span class="nav-tag tag-active">Stage 3 Active</span>
+      </a>
+      <a href="/deadlock-management" class="nav-link" style="display: none;" aria-hidden="true">
+        <span class="nav-icon">&#128274;</span>
+        <span>Deadlock Management</span>
+        <span class="nav-tag tag-placeholder">Stage 4</span>
+      </a>
+
+      <div class="nav-section-label">System & Diagnostics</div>
+      <a href="/api/health" target="_blank" class="nav-link">
+        <span class="nav-icon">&#9877;</span>
+        <span>API Health Endpoint</span>
+        <span class="badge badge-emerald">JSON</span>
+      </a>
+      <button class="nav-link health-indicator-btn" id="healthCheckBtn" style="width: 100%; text-align: left;">
+        <span class="nav-icon">&#9889;</span>
+        <span>Inspect Health Status</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-system-pill">
+        <div style="display: flex; align-items: center;">
+          <span class="status-dot" id="serverStatusDot"></span>
+          <span id="serverStatusText">Connecting...</span>
+        </div>
+        <span id="serverUptimeText" style="color: var(--text-muted); font-size: 0.72rem;">0s</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ==================== MAIN CONTENT CONTAINER ==================== -->
+  <div class="app-container">
+
+    <!-- Topbar Header -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-toggle-btn" id="menuToggleBtn" aria-label="Toggle Navigation">
+          &#9776;
+        </button>
+        <div class="breadcrumbs">
+          <a href="/">OS-Vision</a>
+          <span class="separator">/</span>
+          <a href="/">Modules</a>
+          <span class="separator">/</span>
+          <span class="current">Memory Management</span>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <div class="pill-badge">
+          <span>Clock:</span>
+          <span id="systemClock" style="font-family: monospace; color: var(--accent-cyan);">--:--:--</span>
+        </div>
+        <a href="/" class="btn btn-secondary" style="padding: 0.35rem 0.85rem; font-size: 0.78rem;">
+          &larr; Back to Dashboard
+        </a>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Module Hero Header -->
+      <section class="module-page-header">
+        <div class="module-hero-info">
+          <div class="module-hero-icon" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald);">
+            &#9639;
+          </div>
+          <div>
+            <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem;">
+              <span class="badge badge-emerald">Module 02</span>
+              <span class="badge badge-emerald">Stage 3 Operational</span>
+            </div>
+            <h1 class="module-hero-title">Memory Management Simulator</h1>
+            <p class="module-hero-desc">
+              Comprehensive laboratory for dynamic contiguous partition allocation (First-Fit, Best-Fit, Worst-Fit), 
+              internal and external fragmentation analysis, and virtual memory page replacement algorithms (FIFO, LRU, Optimal).
+            </p>
+            <div class="module-hero-tags">
+              <span class="badge badge-emerald">First-Fit</span>
+              <span class="badge badge-emerald">Best-Fit</span>
+              <span class="badge badge-emerald">Worst-Fit</span>
+              <span class="badge badge-cyan">FIFO Replacement</span>
+              <span class="badge badge-cyan">LRU Replacement</span>
+              <span class="badge badge-cyan">Optimal Replacement</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="module-hero-actions">
+          <a href="/" class="btn btn-secondary">&larr; Return to Dashboard</a>
+        </div>
+      </section>
+
+      <!-- Main Mode Switcher Tab Bar -->
+      <div class="mode-tabs-bar">
+        <button type="button" class="mode-tab-btn active" data-mode="allocation">
+          <span style="font-size: 1.1rem;">&#9638;</span>
+          <span>1. Contiguous Memory Allocation (First / Best / Worst Fit)</span>
+        </button>
+        <button type="button" class="mode-tab-btn" data-mode="pageReplacement">
+          <span style="font-size: 1.1rem;">&#128196;</span>
+          <span>2. Virtual Memory Page Replacement (FIFO / LRU / Optimal)</span>
+        </button>
+      </div>
+
+      <!-- Error Alert Banner -->
+      <div id="memoryErrorAlert" class="error-alert-banner" style="display: none;">
+        <span style="font-size: 1.1rem; flex-shrink: 0;">&#9888;</span>
+        <span id="memoryErrorAlertText" style="flex: 1;"></span>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- SECTION 1: CONTIGUOUS MEMORY ALLOCATION                           -->
+      <!-- ================================================================= -->
+      <div id="allocationSection">
+
+        <!-- Allocation Strategy Selector Bar -->
+        <section style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; margin-bottom: 1.75rem;">
+          <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 0.05em; margin-bottom: 0.75rem;">
+            Select Memory Allocation Strategy:
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 1.25rem;">
+            <button type="button" class="btn btn-secondary algo-tab alloc-algo-tab active" data-algo="first-fit" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">First-Fit</button>
+            <button type="button" class="btn btn-secondary algo-tab alloc-algo-tab" data-algo="best-fit" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">Best-Fit</button>
+            <button type="button" class="btn btn-secondary algo-tab alloc-algo-tab" data-algo="worst-fit" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">Worst-Fit</button>
+          </div>
+
+          <div id="allocAlgoInfoContainer">
+            <div style="border-left: 3px solid var(--accent-emerald); padding-left: 1rem;">
+              <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
+                <h4 style="color: #fff; font-size: 1rem; font-weight: 700;">First-Fit Allocation Strategy</h4>
+                <span class="badge badge-emerald">Contiguous Dynamic Partitioning</span>
+                <span class="badge badge-amber">O(N)</span>
+              </div>
+              <p style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.5;">
+                Scans memory partitions from the beginning and assigns the first free block large enough to accommodate the process. Fast to execute, though prone to external fragmentation near beginning addresses.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Allocation Workspace -->
+        <section class="simulator-workspace-preview">
+
+          <!-- Left Column: Memory & Process Configuration Panel -->
+          <div class="workspace-panel">
+            <div class="panel-title">
+              <span>Memory & Process Configuration</span>
+              <span class="badge badge-emerald">Interactive Inputs</span>
+            </div>
+
+            <!-- Sample Scenario Presets Toolbar -->
+            <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 1.1rem; background: var(--bg-card-subtle); padding: 0.75rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); flex-wrap: wrap;">
+              <div style="flex: 1; min-width: 190px;">
+                <label for="allocPresetSelect" style="display: block; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.25rem;">
+                  Sample Allocation Workload:
+                </label>
+                <select id="allocPresetSelect" style="width: 100%; padding: 0.45rem 0.65rem; background-color: var(--bg-darkest); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); color: var(--text-main); font-size: 0.82rem; outline: none;">
+                  <option value="">-- Choose Sample Scenario --</option>
+                </select>
+              </div>
+              <div style="display: flex; align-items: flex-end;">
+                <button type="button" id="loadAllocSampleBtn" class="btn btn-secondary" style="height: 34px; padding: 0.45rem 0.85rem; font-size: 0.8rem; white-space: nowrap;">
+                  &#128194; Load Scenario
+                </button>
+              </div>
+            </div>
+
+            <!-- Subsection 1: Physical Memory Blocks -->
+            <div style="margin-bottom: 1.25rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.45rem;">
+                <label style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--accent-emerald);">
+                  1. Configured Memory Blocks
+                </label>
+                <span style="font-size: 0.72rem; color: var(--text-muted);">Capacity (KB)</span>
+              </div>
+              <div style="display: flex; gap: 0.5rem; margin-bottom: 0.65rem;">
+                <input type="number" id="inputBlockSize" min="1" max="99999" placeholder="Block Size (KB)" style="flex: 1; padding: 0.45rem 0.7rem; background-color: var(--bg-darkest); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); color: var(--text-main); font-size: 0.82rem; outline: none;">
+                <button type="button" id="addBlockBtn" class="btn btn-primary" style="padding: 0.45rem 0.9rem; font-size: 0.8rem; white-space: nowrap;">
+                  + Add Block
+                </button>
+              </div>
+              <div style="max-height: 150px; overflow-y: auto; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);">
+                <table class="mockup-table" style="margin-bottom: 0;">
+                  <thead>
+                    <tr>
+                      <th>Block ID</th>
+                      <th>Size (KB)</th>
+                      <th style="text-align: right;">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="allocBlocksTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Subsection 2: Process Allocation Requests -->
+            <div style="margin-bottom: 1.25rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.45rem;">
+                <label style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--accent-cyan);">
+                  2. Process Memory Requests
+                </label>
+                <span style="font-size: 0.72rem; color: var(--text-muted);">PID & Size (KB)</span>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 0.5rem; margin-bottom: 0.65rem;">
+                <input type="text" id="inputAllocPid" placeholder="PID (e.g. P5)" style="padding: 0.45rem 0.7rem; background-color: var(--bg-darkest); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); color: var(--text-main); font-size: 0.82rem; outline: none;">
+                <input type="number" id="inputAllocSize" min="1" max="99999" placeholder="Size (KB)" style="padding: 0.45rem 0.7rem; background-color: var(--bg-darkest); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); color: var(--text-main); font-size: 0.82rem; outline: none;">
+                <button type="button" id="addAllocProcBtn" class="btn btn-primary" style="padding: 0.45rem 0.9rem; font-size: 0.8rem; white-space: nowrap;">
+                  + Add Process
+                </button>
+              </div>
+              <div style="max-height: 150px; overflow-y: auto; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);">
+                <table class="mockup-table" style="margin-bottom: 0;">
+                  <thead>
+                    <tr>
+                      <th>Process ID</th>
+                      <th>Size (KB)</th>
+                      <th style="text-align: right;">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="allocProcessTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Actions Toolbar -->
+            <div style="display: flex; gap: 0.5rem; margin-top: auto; flex-wrap: wrap;">
+              <button type="button" id="runAllocBtn" class="btn btn-primary" style="flex: 2; padding: 0.6rem 1rem; font-size: 0.85rem; font-weight: 700;">
+                &#9654; Run Allocation Simulation
+              </button>
+              <button type="button" id="resetAllocBtn" class="btn btn-secondary" style="flex: 1; padding: 0.6rem 0.75rem; font-size: 0.8rem;">
+                &#8634; Reset
+              </button>
+              <button type="button" id="clearAllocBtn" class="btn btn-secondary" style="flex: 1; padding: 0.6rem 0.75rem; font-size: 0.8rem; color: #f87171;">
+                &#128465; Clear All
+              </button>
+            </div>
+          </div>
+
+          <!-- Right Column: Visual Memory Map & Allocation Matrix -->
+          <div class="workspace-panel">
+            <div class="panel-title">
+              <span>Physical Memory Map Visualizer</span>
+              <span class="badge badge-emerald">Live Allocation Engine</span>
+            </div>
+
+            <!-- Map Legend -->
+            <div style="display: flex; flex-wrap: wrap; gap: 0.85rem; align-items: center; margin-bottom: 0.85rem; font-size: 0.75rem;">
+              <div style="display: flex; align-items: center; gap: 0.35rem;">
+                <span style="display: inline-block; width: 12px; height: 12px; border-radius: 2px; background: #06b6d4;"></span>
+                <span style="color: var(--text-secondary);">Allocated Process</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 0.35rem;">
+                <span style="display: inline-block; width: 12px; height: 12px; border-radius: 2px; background: repeating-linear-gradient(45deg, #f59e0b, #f59e0b 2px, rgba(245,158,11,0.2) 2px, rgba(245,158,11,0.2) 6px);"></span>
+                <span style="color: var(--text-secondary);">Internal Fragmentation</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 0.35rem;">
+                <span style="display: inline-block; width: 12px; height: 12px; border-radius: 2px; background: #1e293b; border: 1px dashed #64748b;"></span>
+                <span style="color: var(--text-secondary);">Free Hole</span>
+              </div>
+            </div>
+
+            <!-- Visual Memory Map Track -->
+            <div class="memory-map-wrapper">
+              <div class="memory-map-track" id="memoryMapTrack"></div>
+            </div>
+
+            <!-- Allocation Results Table -->
+            <div style="margin-top: 1rem; margin-bottom: 1.25rem;">
+              <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem; letter-spacing: 0.04em;">
+                Partition Allocation Breakdown
+              </div>
+              <div style="overflow-x: auto; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); max-height: 220px;">
+                <table class="results-data-table">
+                  <thead>
+                    <tr>
+                      <th>PID</th>
+                      <th>Req Size</th>
+                      <th>Assigned Block</th>
+                      <th>Block Size</th>
+                      <th>Internal Frag</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="allocResultsTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- KPI Metric Cards Grid -->
+            <div class="kpi-summary-grid">
+              <div class="kpi-metric-card">
+                <span class="kpi-label">Total Memory</span>
+                <span class="kpi-value" id="metricTotalMemory">-- KB</span>
+                <span class="kpi-formula">&Sigma; Block Sizes</span>
+              </div>
+              <div class="kpi-metric-card">
+                <span class="kpi-label">Allocated Space</span>
+                <span class="kpi-value" id="metricAllocatedMemory" style="color: var(--accent-emerald);">-- KB</span>
+                <span class="kpi-formula">&Sigma; Allocated Processes</span>
+              </div>
+              <div class="kpi-metric-card">
+                <span class="kpi-label">Free Space</span>
+                <span class="kpi-value" id="metricFreeMemory">-- KB</span>
+                <span class="kpi-formula">&Sigma; Unused Holes</span>
+              </div>
+              <div class="kpi-metric-card">
+                <span class="kpi-label">Internal Frag</span>
+                <span class="kpi-value" id="metricInternalFrag" style="color: var(--accent-amber);">-- KB</span>
+                <span class="kpi-formula">Wasted within blocks</span>
+              </div>
+              <div class="kpi-metric-card">
+                <span class="kpi-label">External Frag</span>
+                <span class="kpi-value" id="metricExternalFrag" style="color: #f87171;">-- KB</span>
+                <span class="kpi-formula">Free but unusable</span>
+              </div>
+              <div class="kpi-metric-card">
+                <span class="kpi-label">Allocation Rate</span>
+                <span class="kpi-value" id="metricAllocRate" style="color: var(--accent-cyan);">-- %</span>
+                <span class="kpi-formula">Allocated / Total</span>
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- SECTION 2: VIRTUAL MEMORY PAGE REPLACEMENT                        -->
+      <!-- ================================================================= -->
+      <div id="pageReplacementSection" style="display: none;">
+
+        <!-- Page Algorithm Selector Bar -->
+        <section style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; margin-bottom: 1.75rem;">
+          <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 0.05em; margin-bottom: 0.75rem;">
+            Select Page Replacement Algorithm:
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 1.25rem;">
+            <button type="button" class="btn btn-secondary algo-tab page-algo-tab" data-algo="fifo" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">FIFO (First-In, First-Out)</button>
+            <button type="button" class="btn btn-secondary algo-tab page-algo-tab active" data-algo="lru" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">LRU (Least Recently Used)</button>
+            <button type="button" class="btn btn-secondary algo-tab page-algo-tab" data-algo="optimal" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">Optimal (Belady's Min)</button>
+          </div>
+
+          <div id="pageAlgoInfoContainer">
+            <div style="border-left: 3px solid var(--accent-cyan); padding-left: 1rem;">
+              <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
+                <h4 style="color: #fff; font-size: 1rem; font-weight: 700;">Least Recently Used (LRU) Page Replacement</h4>
+                <span class="badge badge-cyan">Virtual Memory Management</span>
+                <span class="badge badge-amber">O(1) with stack / timestamps</span>
+              </div>
+              <p style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.5;">
+                Tracks page reference timestamps and evicts the page that has not been accessed for the longest duration of past time. Approximates optimal replacement.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Page Replacement Workspace -->
+        <section class="simulator-workspace-preview">
+
+          <!-- Left Column: Reference Configuration Panel -->
+          <div class="workspace-panel">
+            <div class="panel-title">
+              <span>Page Reference Configuration</span>
+              <span class="badge badge-cyan">Interactive Inputs</span>
+            </div>
+
+            <!-- Sample Scenario Presets Toolbar -->
+            <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 1.1rem; background: var(--bg-card-subtle); padding: 0.75rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); flex-wrap: wrap;">
+              <div style="flex: 1; min-width: 190px;">
+                <label for="pagePresetSelect" style="display: block; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.25rem;">
+                  Sample Reference Workload:
+                </label>
+                <select id="pagePresetSelect" style="width: 100%; padding: 0.45rem 0.65rem; background-color: var(--bg-darkest); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); color: var(--text-main); font-size: 0.82rem; outline: none;">
+                  <option value="">-- Choose Sample Reference String --</option>
+                </select>
+              </div>
+              <div style="display: flex; align-items: flex-end;">
+                <button type="button" id="loadPageSampleBtn" class="btn btn-secondary" style="height: 34px; padding: 0.45rem 0.85rem; font-size: 0.8rem; white-space: nowrap;">
+                  &#128194; Load Scenario
+                </button>
+              </div>
+            </div>
+
+            <!-- Reference String Input -->
+            <div class="mockup-form-group" style="margin-bottom: 1rem;">
+              <label class="mockup-label" for="inputRefString">Page Reference String (Comma or space separated integers)</label>
+              <input type="text" id="inputRefString" class="mockup-input" value="7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0, 3, 2, 1, 2, 0, 1, 7, 0, 1" style="font-family: monospace; font-size: 0.85rem;">
+              <span style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.2rem; display: block;">Example: 7, 0, 1, 2, 0, 3, 0, 4, 2, 3</span>
+            </div>
+
+            <!-- Page Frames Count Input -->
+            <div class="mockup-form-group" style="margin-bottom: 1.25rem;">
+              <label class="mockup-label" for="inputFramesCount">Number of Physical Page Frames (1 &ndash; 10)</label>
+              <input type="number" id="inputFramesCount" class="mockup-input" min="1" max="10" value="3" style="font-family: monospace; font-weight: 700; font-size: 0.9rem;">
+            </div>
+
+            <!-- Action Buttons Toolbar -->
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+              <button type="button" id="runPageSimBtn" class="btn btn-primary" style="flex: 2; padding: 0.6rem 1rem; font-size: 0.85rem; font-weight: 700;">
+                &#9654; Run Page Simulation
+              </button>
+              <button type="button" id="resetPageBtn" class="btn btn-secondary" style="flex: 1; padding: 0.6rem 0.75rem; font-size: 0.8rem;">
+                &#8634; Reset
+              </button>
+              <button type="button" id="clearPageBtn" class="btn btn-secondary" style="flex: 1; padding: 0.6rem 0.75rem; font-size: 0.8rem; color: #f87171;">
+                &#128465; Clear
+              </button>
+            </div>
+
+            <!-- Live Active Frame Slots Container -->
+            <div style="background: var(--bg-card-subtle); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1rem; margin-top: auto;">
+              <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--accent-cyan); margin-bottom: 0.5rem; letter-spacing: 0.04em;">
+                Live Active Frame Slots (Current Step)
+              </div>
+              <div id="currentFramesLiveDisplay" style="display: flex; gap: 0.6rem; flex-wrap: wrap;"></div>
+            </div>
+          </div>
+
+          <!-- Right Column: Step-by-Step Playback & Frame Matrix -->
+          <div class="workspace-panel">
+            <div class="panel-title">
+              <span>Page Replacement Matrix Visualizer</span>
+              <span class="badge badge-cyan">Step Matrix</span>
+            </div>
+
+            <!-- Step-by-Step Playback Controls Bar -->
+            <div class="playback-controls-bar">
+              <div class="playback-buttons">
+                <button type="button" id="pagePlayBtn" class="btn btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.82rem; font-weight: 700; color: var(--accent-emerald);">
+                  &#9654; Play
+                </button>
+                <button type="button" id="pagePrevBtn" class="btn btn-secondary" style="padding: 0.4rem 0.65rem; font-size: 0.82rem;">
+                  &#9664; Prev
+                </button>
+                <button type="button" id="pageNextBtn" class="btn btn-secondary" style="padding: 0.4rem 0.65rem; font-size: 0.82rem;">
+                  Next &#9654;
+                </button>
+                <button type="button" id="pageResetStepBtn" class="btn btn-secondary" style="padding: 0.4rem 0.65rem; font-size: 0.82rem;">
+                  &#8634; Beginning
+                </button>
+              </div>
+
+              <div class="playback-step-info">
+                <span id="pageStepCounter">Step: -- / --</span>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 0.4rem;">
+                <label for="pageSpeedSelect" style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Speed:</label>
+                <select id="pageSpeedSelect" style="padding: 0.3rem 0.5rem; background: var(--bg-darkest); border: 1px solid var(--border-subtle); color: #fff; border-radius: var(--radius-sm); font-size: 0.75rem; outline: none;">
+                  <option value="400">Fast (400ms)</option>
+                  <option value="800" selected>Normal (800ms)</option>
+                  <option value="1500">Slow (1.5s)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Scrollable Frame Replacement Matrix Table -->
+            <div class="page-matrix-container" id="pageMatrixContainer">
+              <div style="text-align: center; color: var(--text-muted); padding: 2rem 0; font-size: 0.85rem;">
+                Click "Run Page Simulation" to generate the step-by-step page replacement matrix.
+              </div>
+            </div>
+
+            <!-- KPI Summary Cards for Virtual Memory -->
+            <div class="kpi-summary-grid">
+              <div class="kpi-metric-card">
+                <span class="kpi-label">Total References</span>
+                <span class="kpi-value" id="metricTotalRefs">--</span>
+                <span class="kpi-formula">Page access stream</span>
+              </div>
+              <div class="kpi-metric-card">
+                <span class="kpi-label">Page Faults</span>
+                <span class="kpi-value" id="metricPageFaults" style="color: #f87171;">--</span>
+                <span class="kpi-formula">Page misses (loaded to frame)</span>
+              </div>
+              <div class="kpi-metric-card">
+                <span class="kpi-label">Page Hits</span>
+                <span class="kpi-value" id="metricPageHits" style="color: var(--accent-emerald);">--</span>
+                <span class="kpi-formula">Already in memory</span>
+              </div>
+              <div class="kpi-metric-card">
+                <span class="kpi-label">Fault Ratio</span>
+                <span class="kpi-value" id="metricFaultRate" style="color: var(--accent-amber);">-- %</span>
+                <span class="kpi-formula">Faults / Total References</span>
+              </div>
+              <div class="kpi-metric-card">
+                <span class="kpi-label">Hit Ratio</span>
+                <span class="kpi-value" id="metricHitRate" style="color: var(--accent-cyan);">-- %</span>
+                <span class="kpi-formula">Hits / Total References</span>
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+      </div>
+
+      <!-- Algorithmic Specifications Grid -->
+      <section style="margin-top: 2rem;">
+        <div class="section-header">
+          <h3>Theoretical Foundations of Memory Architecture</h3>
+          <p>Key algorithmic principles simulated in Stage 3.</p>
+        </div>
+
+        <div class="features-specs-grid">
+          <div class="spec-card">
+            <h4><span>&#9670;</span> Contiguous Dynamic Partitioning</h4>
+            <p>Evaluation of First-Fit, Best-Fit, and Worst-Fit allocation schemes. Highlights trade-offs between internal fragmentation and search overhead.</p>
+          </div>
+          <div class="spec-card">
+            <h4><span>&#9670;</span> FIFO & Belady's Anomaly</h4>
+            <p>Demonstrates that increasing physical page frames can paradoxically increase page fault counts under FIFO page replacement.</p>
+          </div>
+          <div class="spec-card">
+            <h4><span>&#9670;</span> Least Recently Used (LRU)</h4>
+            <p>Stack-based approximation algorithm replacing the page untouched for the longest historical period. Complies with the inclusion property.</p>
+          </div>
+          <div class="spec-card">
+            <h4><span>&#9670;</span> Optimal Replacement (OPT)</h4>
+            <p>Theoretical gold standard with clairvoyant lookahead knowledge. Establishes the lower bound of page faults for any given reference string.</p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="page-footer">
+      <div>
+        <strong>OS-Vision</strong> &mdash; Stage 3 Memory Management Simulator
+      </div>
+      <div>
+        Interactive Operating System Laboratory &bull; Stage 3 Operational &bull; <a href="/">Return to Dashboard</a>
+      </div>
+    </footer>
+
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script src="/js/memory-management.js"></script>
+</body>
+</html>

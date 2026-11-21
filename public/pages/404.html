@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 - Page Not Found | OS-Vision</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body style="display:flex; align-items:center; justify-content:center; min-height:100vh; background-color:var(--bg-darkest);">
+  <div style="text-align:center; padding:3rem; max-width:550px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg);">
+    <div style="font-size:3.5rem; font-weight:800; color:var(--accent-cyan); margin-bottom:0.5rem; font-family:monospace;">404</div>
+    <div class="badge badge-amber" style="margin-bottom:1rem;">Page Fault / Trap: Interrupt 0x0E</div>
+    <h1 style="font-size:1.45rem; color:#fff; margin-bottom:0.75rem;">Segment Not Found</h1>
+    <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.5; margin-bottom:2rem;">
+      The memory address or route you requested is outside the virtual address space of OS-Vision Simulator.
+    </p>
+    <div style="display:flex; justify-content:center; gap:1rem;">
+      <a href="/" class="btn btn-primary">&larr; Return to Dashboard</a>
+      <a href="/api/health" class="btn btn-secondary">Check Health API</a>
+    </div>
+  </div>
+</body>
+</html>

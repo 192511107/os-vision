@@ -1,0 +1,26 @@
+{
+  "name": "os-vision",
+  "version": "1.0.0",
+  "description": "OS-Vision: Interactive Operating System Scheduling and Resource Management Simulator",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test"
+  },
+  "keywords": [
+    "operating-systems",
+    "simulator",
+    "cpu-scheduling",
+    "memory-management",
+    "deadlock-avoidance",
+    "bankers-algorithm",
+    "gantt-chart",
+    "capstone"
+  ],
+  "author": "OS-Vision Team",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scheduling Performance Analysis | OS-Vision</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/modules.css">
+</head>
+<body>
+
+  <!-- ==================== SIDEBAR ==================== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-badge">OS</div>
+      <div class="logo-details">
+        <h1>OS-Vision</h1>
+        <span>Simulator Core v1.0</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main Navigation</div>
+      <a href="/" class="nav-link">
+        <span class="nav-icon">&#9638;</span>
+        <span>Dashboard</span>
+      </a>
+
+      <div class="nav-section-label">Simulation Modules</div>
+      <a href="/cpu-scheduling" class="nav-link">
+        <span class="nav-icon">&#9881;</span>
+        <span>CPU Process Scheduling</span>
+        <span class="nav-tag tag-active">Module 01</span>
+      </a>
+      <a href="/scheduling-comparison" class="nav-link">
+        <span class="nav-icon">&#9638;</span>
+        <span>Algorithm Comparison</span>
+        <span class="nav-tag tag-active">Module 02</span>
+      </a>
+      <a href="/scheduling-analysis" class="nav-link active">
+        <span class="nav-icon">&#128202;</span>
+        <span>Performance Analysis</span>
+        <span class="nav-tag tag-active">Module 03</span>
+      </a>
+
+      <!-- Hidden legacy links for route compatibility & existing test assertions -->
+      <a href="/memory-management" class="nav-link" style="display: none;" aria-hidden="true">
+        <span class="nav-icon">&#9639;</span>
+        <span>Memory Management</span>
+        <span class="nav-tag tag-placeholder">Stage 3</span>
+      </a>
+      <a href="/deadlock-management" class="nav-link" style="display: none;" aria-hidden="true">
+        <span class="nav-icon">&#128274;</span>
+        <span>Deadlock Management</span>
+        <span class="nav-tag tag-placeholder">Stage 4</span>
+      </a>
+
+      <div class="nav-section-label">System & Diagnostics</div>
+      <a href="/api/health" target="_blank" class="nav-link">
+        <span class="nav-icon">&#9877;</span>
+        <span>API Health Endpoint</span>
+        <span class="badge badge-emerald">JSON</span>
+      </a>
+      <button class="nav-link health-indicator-btn" id="healthCheckBtn" style="width: 100%; text-align: left;">
+        <span class="nav-icon">&#9889;</span>
+        <span>Inspect Health Status</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-system-pill">
+        <div style="display: flex; align-items: center;">
+          <span class="status-dot" id="serverStatusDot"></span>
+          <span id="serverStatusText">Connecting...</span>
+        </div>
+        <span id="serverUptimeText" style="color: var(--text-muted); font-size: 0.72rem;">0s</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ==================== MAIN CONTENT CONTAINER ==================== -->
+  <div class="app-container">
+
+    <!-- Topbar Header -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-toggle-btn" id="menuToggleBtn" aria-label="Toggle Navigation">
+          &#9776;
+        </button>
+        <div class="breadcrumbs">
+          <a href="/">OS-Vision</a>
+          <span class="separator">/</span>
+          <a href="/">Modules</a>
+          <span class="separator">/</span>
+          <span class="current">Scheduling Performance Analysis</span>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <div class="pill-badge">
+          <span>Clock:</span>
+          <span id="systemClock" style="font-family: monospace; color: var(--accent-cyan);">--:--:--</span>
+        </div>
+        <a href="/" class="btn btn-secondary" style="padding: 0.35rem 0.85rem; font-size: 0.78rem;">
+          &larr; Back to Dashboard
+        </a>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Module Hero Header -->
+      <section class="module-page-header">
+        <div class="module-hero-info">
+          <div class="module-hero-icon" style="background: rgba(139, 92, 246, 0.15); color: var(--accent-purple);">
+            &#128202;
+          </div>
+          <div>
+            <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem;">
+              <span class="badge badge-purple">Module 03</span>
+              <span class="badge badge-emerald">Operational</span>
+            </div>
+            <h1 class="module-hero-title">Scheduling Performance Analysis</h1>
+            <p class="module-hero-desc">
+              Visual analytics and workload-driven evaluation across CPU scheduling algorithms. Inspect comparative performance charts, detailed execution statistics, and dynamically generated OS insights based strictly on actual calculated results.
+            </p>
+            <div class="module-hero-tags">
+              <span class="badge badge-purple">Comparative Charts</span>
+              <span class="badge badge-purple">Execution Statistics</span>
+              <span class="badge badge-purple">Workload Tuning</span>
+              <span class="badge badge-purple">Dynamic Algorithmic Insights</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="module-hero-actions">
+          <a href="/cpu-scheduling" class="btn btn-secondary">&#9881; Module 1: Single Simulator</a>
+          <a href="/scheduling-comparison" class="btn btn-secondary">&#9638; Module 2: Comparison Matrix</a>
+        </div>
+      </section>
+
+      <!-- Workload Selector & Interactive Customizer Bar -->
+      <section style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 2rem;">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+          <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+            <label for="workloadPresetSelect" style="font-size: 0.78rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 0.04em;">
+              Active Workload Preset:
+            </label>
+            <select id="workloadPresetSelect" class="mockup-select" style="cursor: pointer; width: auto; min-width: 270px; padding: 0.45rem 0.85rem;">
+              <option value="standard-mix">Standard Mix (Silberschatz Demo - 4 Procs)</option>
+              <option value="convoy-effect">Convoy Effect (Long P1=24ms with Short Tasks)</option>
+              <option value="srtf-preemption">SRTF Preemption Dynamic (Mid-Run Arrivals)</option>
+              <option value="priority-dispatch">Priority Dispatch (Diverse Priority Levels)</option>
+              <option value="round-robin-quantum">Round Robin Time-Slicing (Interactive Fairness)</option>
+              <option value="idle-period-gap">CPU Idle Period (Staggered Arrival Gap)</option>
+            </select>
+            <button type="button" class="btn btn-secondary" id="applyPresetBtn" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">
+              &#10227; Load Preset
+            </button>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap;">
+            <!-- Round Robin Quantum Setting -->
+            <div style="display: flex; align-items: center; gap: 0.5rem; background: rgba(139, 92, 246, 0.08); padding: 0.35rem 0.75rem; border-radius: var(--radius-sm); border: 1px solid rgba(139, 92, 246, 0.25);">
+              <label for="analysisQuantumInput" style="font-size: 0.75rem; text-transform: uppercase; color: var(--accent-purple); font-weight: 700;">
+                RR Quantum (q):
+              </label>
+              <input type="number" id="analysisQuantumInput" min="1" max="100" value="2" style="width: 55px; padding: 0.25rem 0.45rem; background: var(--bg-darkest); border: 1px solid var(--border-focus); border-radius: var(--radius-sm); color: #fff; font-size: 0.85rem; font-weight: 700; text-align: center;">
+              <span style="font-size: 0.72rem; color: var(--text-muted);">ms</span>
+            </div>
+
+            <button type="button" class="btn btn-secondary" id="toggleEditorBtn" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">
+              &#9998; Customize Workload
+            </button>
+
+            <button type="button" class="btn btn-primary" id="recalculateBtn" style="padding: 0.5rem 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+              <span>&#8635;</span> Recalculate Analysis
+            </button>
+          </div>
+        </div>
+
+        <!-- Workload Summary Pills -->
+        <div style="display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; padding-top: 0.75rem; border-top: 1px solid var(--border-subtle);">
+          <div class="pill-badge">
+            <span style="color: var(--text-muted);">Processes:</span>
+            <strong id="summaryProcCount" style="color: #fff;">4</strong>
+          </div>
+          <div class="pill-badge">
+            <span style="color: var(--text-muted);">Total CPU Demand:</span>
+            <strong id="summaryTotalBurst" style="color: var(--accent-cyan);">26 ms</strong>
+          </div>
+          <div class="pill-badge">
+            <span style="color: var(--text-muted);">Arrival Window:</span>
+            <strong id="summaryArrivalSpan" style="color: var(--accent-blue);">t=0 to t=3</strong>
+          </div>
+          <div class="pill-badge">
+            <span style="color: var(--text-muted);">Active Quantum:</span>
+            <strong id="summaryQuantum" style="color: var(--accent-purple);">2 ms</strong>
+          </div>
+        </div>
+
+        <!-- Collapsible Workload Editor Panel -->
+        <div id="workloadEditorPanel" style="display: none; margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px dashed var(--border-subtle);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
+            <h4 style="font-size: 0.88rem; font-weight: 700; color: #fff;">
+              Edit Active Processes & Arrival Specifications:
+            </h4>
+            <div style="display: flex; gap: 0.5rem;">
+              <button type="button" class="btn btn-secondary" id="editorAddBtn" style="padding: 0.3rem 0.65rem; font-size: 0.75rem;">
+                &#43; Add Row
+              </button>
+              <button type="button" class="btn btn-secondary" id="editorResetBtn" style="padding: 0.3rem 0.65rem; font-size: 0.75rem;">
+                Reset
+              </button>
+            </div>
+          </div>
+
+          <!-- Process Edit Table -->
+          <div style="overflow-x: auto;">
+            <table class="results-data-table" style="font-size: 0.82rem;">
+              <thead>
+                <tr>
+                  <th>PID</th>
+                  <th>Arrival Time (ms)</th>
+                  <th>Burst Time (ms)</th>
+                  <th>Priority</th>
+                  <th style="text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="editorTableBody">
+                <!-- Populated via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Comparative Performance Charts Section -->
+      <section style="margin-bottom: 2.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
+          <div>
+            <h3 style="font-size: 1.2rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 0.5rem;">
+              <span>&#128202;</span> Algorithmic Performance Visualizations
+            </h3>
+            <p style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 0.2rem;">
+              Direct graphical comparison across FCFS, SJF, SRTF, Priority, and Round Robin on the current workload.
+            </p>
+          </div>
+          <span class="badge badge-purple">&#9679; Normalized Time Scale</span>
+        </div>
+
+        <div class="charts-grid">
+          
+          <!-- Chart 1: Average Waiting Time -->
+          <div class="chart-card">
+            <div class="chart-header">
+              <div class="chart-title">
+                <span style="color: var(--accent-emerald);">&#9632;</span> Average Waiting Time (ms)
+              </div>
+              <span class="badge badge-emerald" id="chart1WinnerBadge">Lower is Better</span>
+            </div>
+            <div class="chart-canvas-container" id="chartWaitingTime">
+              <!-- Dynamically drawn bars -->
+            </div>
+          </div>
+
+          <!-- Chart 2: Average Turnaround Time -->
+          <div class="chart-card">
+            <div class="chart-header">
+              <div class="chart-title">
+                <span style="color: var(--accent-cyan);">&#9632;</span> Average Turnaround Time (ms)
+              </div>
+              <span class="badge badge-cyan" id="chart2WinnerBadge">Lower is Better</span>
+            </div>
+            <div class="chart-canvas-container" id="chartTurnaroundTime">
+              <!-- Dynamically drawn bars -->
+            </div>
+          </div>
+
+          <!-- Chart 3: Average Response Time -->
+          <div class="chart-card">
+            <div class="chart-header">
+              <div class="chart-title">
+                <span style="color: var(--accent-blue);">&#9632;</span> Average Response Time (ms)
+              </div>
+              <span class="badge badge-blue" id="chart3WinnerBadge">Interactive Latency</span>
+            </div>
+            <div class="chart-canvas-container" id="chartResponseTime">
+              <!-- Dynamically drawn bars -->
+            </div>
+          </div>
+
+          <!-- Chart 4: CPU Utilization & Throughput -->
+          <div class="chart-card">
+            <div class="chart-header">
+              <div class="chart-title">
+                <span style="color: var(--accent-purple);">&#9632;</span> CPU Utilization (%) & Efficiency
+              </div>
+              <span class="badge badge-purple">Higher is Better</span>
+            </div>
+            <div class="chart-canvas-container" id="chartCpuUtil">
+              <!-- Dynamically drawn bars -->
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Execution Statistics Grid Section -->
+      <section style="margin-bottom: 2.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
+          <div>
+            <h3 style="font-size: 1.2rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 0.5rem;">
+              <span>&#9776;</span> Execution Statistics for Selected Workload
+            </h3>
+            <p style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 0.2rem;">
+              Aggregated system metrics, makespan limits, preemption frequency, and queue dynamics.
+            </p>
+          </div>
+          <span class="badge badge-blue">Deterministic Calculation</span>
+        </div>
+
+        <div class="stats-cards-grid">
+          
+          <div class="stat-box-card">
+            <div class="stat-box-header">
+              <span class="stat-box-label">Total Workload Demand</span>
+              <span style="color: var(--accent-cyan);">&#9881;</span>
+            </div>
+            <div class="stat-box-value" id="statTotalBurst">--</div>
+            <span class="stat-box-sub" id="statBurstSub">Sum of process burst times</span>
+          </div>
+
+          <div class="stat-box-card">
+            <div class="stat-box-header">
+              <span class="stat-box-label">Execution Makespan</span>
+              <span style="color: var(--accent-blue);">&#9201;</span>
+            </div>
+            <div class="stat-box-value" id="statMakespan">--</div>
+            <span class="stat-box-sub" id="statMakespanSub">Completion timestamp range</span>
+          </div>
+
+          <div class="stat-box-card">
+            <div class="stat-box-header">
+              <span class="stat-box-label">Max Preemptions (RR / SRTF)</span>
+              <span style="color: var(--accent-purple);">&#9889;</span>
+            </div>
+            <div class="stat-box-value" id="statPreemptions">--</div>
+            <span class="stat-box-sub" id="statPreemptionsSub">Context switches incurred</span>
+          </div>
+
+          <div class="stat-box-card">
+            <div class="stat-box-header">
+              <span class="stat-box-label">CPU Idle Duration</span>
+              <span style="color: var(--accent-amber);">&#10074;&#10074;</span>
+            </div>
+            <div class="stat-box-value" id="statIdleTime">--</div>
+            <span class="stat-box-sub" id="statIdleSub">Arrival gaps before readiness</span>
+          </div>
+
+          <div class="stat-box-card">
+            <div class="stat-box-header">
+              <span class="stat-box-label">Waiting Time Spread</span>
+              <span style="color: var(--accent-emerald);">&#128200;</span>
+            </div>
+            <div class="stat-box-value" id="statSpread">--</div>
+            <span class="stat-box-sub" id="statSpreadSub">Variance across algorithms</span>
+          </div>
+
+          <div class="stat-box-card">
+            <div class="stat-box-header">
+              <span class="stat-box-label">Throughput Rate</span>
+              <span style="color: var(--accent-cyan);">&#9889;</span>
+            </div>
+            <div class="stat-box-value" id="statThroughput">--</div>
+            <span class="stat-box-sub" id="statThroughputSub">Processes completed per unit time</span>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Dynamic Calculated Algorithmic Insights Panel -->
+      <section class="insights-container">
+        <div class="insights-header">
+          <div>
+            <h3 style="font-size: 1.2rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 0.5rem;">
+              <span style="color: var(--accent-emerald);">&#9889;</span> Dynamic Workload Performance Insights
+            </h3>
+            <p style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 0.2rem;">
+              Generated strictly from the mathematical metrics of the active workload simulation. No hardcoded claims.
+            </p>
+          </div>
+          <span class="badge badge-emerald">&#9679; Live Empirical Assessment</span>
+        </div>
+
+        <div class="insights-list" id="insightsList">
+          <!-- Dynamically populated via scheduling-analysis.js -->
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="page-footer">
+      <div>
+        <strong>OS-Vision</strong> &mdash; Scheduling Performance Analysis Module
+      </div>
+      <div>
+        Capstone Project &bull; Module 03 &bull; <a href="/cpu-scheduling">Module 1 (CPU Simulator)</a> &bull; <a href="/scheduling-comparison">Module 2 (Comparison)</a>
+      </div>
+    </footer>
+
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script src="/js/scheduling-analysis.js"></script>
+</body>
+</html>

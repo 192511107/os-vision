@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deadlock Management Simulator | OS-Vision</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/modules.css">
+</head>
+<body>
+
+  <!-- ==================== SIDEBAR ==================== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-badge">OS</div>
+      <div class="logo-details">
+        <h1>OS-Vision</h1>
+        <span>Simulator Core v1.0</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main Navigation</div>
+      <a href="/" class="nav-link">
+        <span class="nav-icon">&#9638;</span>
+        <span>Dashboard</span>
+      </a>
+
+      <div class="nav-section-label">Simulation Modules</div>
+      <a href="/cpu-scheduling" class="nav-link">
+        <span class="nav-icon">&#9881;</span>
+        <span>CPU Process Scheduling</span>
+        <span class="nav-tag tag-active">Module 01</span>
+      </a>
+      <a href="/scheduling-comparison" class="nav-link">
+        <span class="nav-icon">&#9638;</span>
+        <span>Algorithm Comparison</span>
+        <span class="nav-tag tag-active">Module 02</span>
+      </a>
+      <a href="/scheduling-analysis" class="nav-link">
+        <span class="nav-icon">&#128202;</span>
+        <span>Performance Analysis</span>
+        <span class="nav-tag tag-active">Module 03</span>
+      </a>
+
+      <!-- Hidden legacy links for route compatibility & existing test assertions -->
+      <a href="/memory-management" class="nav-link" style="display: none;" aria-hidden="true">
+        <span class="nav-icon">&#9639;</span>
+        <span>Memory Management</span>
+        <span class="nav-tag tag-placeholder">Stage 3</span>
+      </a>
+      <a href="/deadlock-management" class="nav-link active" style="display: none;" aria-hidden="true">
+        <span class="nav-icon">&#128274;</span>
+        <span>Deadlock Management</span>
+        <span class="nav-tag tag-placeholder">Stage 4</span>
+      </a>
+
+      <div class="nav-section-label">System & Diagnostics</div>
+      <a href="/api/health" target="_blank" class="nav-link">
+        <span class="nav-icon">&#9877;</span>
+        <span>API Health Endpoint</span>
+        <span class="badge badge-emerald">JSON</span>
+      </a>
+      <button class="nav-link health-indicator-btn" id="healthCheckBtn" style="width: 100%; text-align: left;">
+        <span class="nav-icon">&#9889;</span>
+        <span>Inspect Health Status</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-system-pill">
+        <div style="display: flex; align-items: center;">
+          <span class="status-dot" id="serverStatusDot"></span>
+          <span id="serverStatusText">Connecting...</span>
+        </div>
+        <span id="serverUptimeText" style="color: var(--text-muted); font-size: 0.72rem;">0s</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ==================== MAIN CONTENT CONTAINER ==================== -->
+  <div class="app-container">
+
+    <!-- Topbar Header -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-toggle-btn" id="menuToggleBtn" aria-label="Toggle Navigation">
+          &#9776;
+        </button>
+        <div class="breadcrumbs">
+          <a href="/">OS-Vision</a>
+          <span class="separator">/</span>
+          <a href="/">Modules</a>
+          <span class="separator">/</span>
+          <span class="current">Deadlock Management</span>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <div class="pill-badge">
+          <span>Clock:</span>
+          <span id="systemClock" style="font-family: monospace; color: var(--accent-cyan);">--:--:--</span>
+        </div>
+        <a href="/" class="btn btn-secondary" style="padding: 0.35rem 0.85rem; font-size: 0.78rem;">
+          &larr; Back to Dashboard
+        </a>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Module Hero Header -->
+      <section class="module-page-header">
+        <div class="module-hero-info">
+          <div class="module-hero-icon" style="background: rgba(139, 92, 246, 0.15); color: var(--accent-purple);">
+            &#128274;
+          </div>
+          <div>
+            <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem;">
+              <span class="badge badge-purple">Module 03 Placeholder</span>
+              <span class="badge badge-blue">Stage 1 Foundation Ready</span>
+            </div>
+            <h1 class="module-hero-title">Deadlock Management Simulator</h1>
+            <p class="module-hero-desc">
+              Interactive environment for evaluating system safety using Banker's Algorithm, 
+              rendering Resource Allocation Graphs (RAG) with cycle detection, and simulating deadlock recovery strategies.
+            </p>
+            <div class="module-hero-tags">
+              <span class="badge badge-purple">Banker's Algorithm</span>
+              <span class="badge badge-purple">Resource Allocation Graph (RAG)</span>
+              <span class="badge badge-purple">Safe Sequence Finder</span>
+              <span class="badge badge-purple">Safety Analysis</span>
+              <span class="badge badge-purple">Deadlock Detection & Recovery</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="module-hero-actions">
+          <a href="/" class="btn btn-secondary">&larr; Return to Dashboard</a>
+        </div>
+      </section>
+
+      <!-- Algorithm Selector Tab Bar -->
+      <section style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; margin-bottom: 2rem;">
+        <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 0.05em; margin-bottom: 0.75rem;">
+          Select Deadlock Concept / Engine:
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 1.25rem;">
+          <button class="btn btn-secondary algo-tab active" data-algo="bankers" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">Banker's Algorithm</button>
+          <button class="btn btn-secondary algo-tab" data-algo="rag" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">Resource Allocation Graph</button>
+          <button class="btn btn-secondary algo-tab" data-algo="safety-check" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">Safety State Check</button>
+          <button class="btn btn-secondary algo-tab" data-algo="detection" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">Detection & Recovery</button>
+        </div>
+
+        <div id="algoInfoContainer">
+          <div style="border-left: 3px solid var(--accent-purple); padding-left: 1rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
+              <h4 style="color: #fff; font-size: 1rem; font-weight: 700;">Banker's Algorithm</h4>
+              <span class="badge badge-purple">Deadlock Avoidance</span>
+              <span class="badge badge-amber">O(M * N^2)</span>
+            </div>
+            <p style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.5;">
+              Tests for safety by simulating the allocation of predetermined maximum possible amounts of all resources before deciding whether allocation should be granted.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Stage 4 Callout -->
+      <section class="stage-callout">
+        <div class="stage-callout-text">
+          <h4><span>&#9432;</span> Stage 1 Foundation Active</h4>
+          <p>
+            The route, responsive styling, and backend communication are ready. 
+            The full multi-resource matrix calculator, safety sequence solver, and graph cycle visualizer will be implemented in <strong>Stage 4</strong>.
+          </p>
+        </div>
+        <button class="btn btn-primary disabled-control-btn">Solve Safety State (Stage 4)</button>
+      </section>
+
+      <!-- Mockup Simulation Workspace Preview -->
+      <section class="simulator-workspace-preview">
+
+        <!-- Left: Resource Allocation Matrix Controls -->
+        <div class="workspace-panel">
+          <div class="panel-title">
+            <span>Resource Matrix Configuration</span>
+            <span class="badge badge-purple">Stage 4 Wireframe</span>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+            <div class="mockup-form-group">
+              <label class="mockup-label">Processes (N)</label>
+              <input type="number" class="mockup-input" value="5" disabled>
+            </div>
+            <div class="mockup-form-group">
+              <label class="mockup-label">Resource Types (M)</label>
+              <input type="number" class="mockup-input" value="3" disabled>
+            </div>
+          </div>
+
+          <div class="mockup-form-group">
+            <label class="mockup-label">Available Vector [A, B, C]</label>
+            <input type="text" class="mockup-input" value="[3, 3, 2]" disabled>
+          </div>
+
+          <button class="btn btn-secondary disabled-control-btn" style="width: 100%; margin-bottom: 1.25rem;">
+            + Edit Process Resource Claim
+          </button>
+
+          <div class="panel-title" style="margin-top: 0.5rem;">
+            <span>Sample Allocation Matrix</span>
+          </div>
+
+          <table class="mockup-table">
+            <thead>
+              <tr>
+                <th>PID</th>
+                <th>Allocated (A,B,C)</th>
+                <th>Max Need (A,B,C)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>P0</strong></td>
+                <td>0, 1, 0</td>
+                <td>7, 5, 3</td>
+              </tr>
+              <tr>
+                <td><strong>P1</strong></td>
+                <td>2, 0, 0</td>
+                <td>3, 2, 2</td>
+              </tr>
+              <tr>
+                <td><strong>P2</strong></td>
+                <td>3, 0, 2</td>
+                <td>9, 0, 2</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Right: Safety Sequence & RAG Preview -->
+        <div class="workspace-panel">
+          <div class="panel-title">
+            <span>Safety State & Graph Visualizer</span>
+            <span class="badge badge-blue">UI Preview</span>
+          </div>
+
+          <div class="mockup-viz-canvas">
+            <div class="viz-placeholder-icon" style="color: var(--accent-purple);">&#128274;</div>
+            <h3 class="viz-placeholder-title">Resource Allocation Graph (RAG) Wireframe</h3>
+            <p class="viz-placeholder-text">
+              During Stage 4, processes (circles) and resource instances (squares with dots) will be rendered interactively with directed assignment and request edges.
+            </p>
+          </div>
+
+          <!-- Quick Metrics Preview -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-top: auto;">
+            <div style="background: var(--bg-darkest); padding: 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+              <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">System State</div>
+              <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent-emerald); margin-top: 0.2rem;">SAFE</div>
+            </div>
+            <div style="background: var(--bg-darkest); padding: 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+              <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Safe Sequence</div>
+              <div style="font-size: 0.95rem; font-weight: 700; color: #fff; margin-top: 0.4rem; font-family: monospace;">&lt;P1, P3, P4, P0, P2&gt;</div>
+            </div>
+            <div style="background: var(--bg-darkest); padding: 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+              <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Deadlock Status</div>
+              <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent-emerald); margin-top: 0.2rem;">None</div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Planned Features Grid -->
+      <section>
+        <div class="section-header">
+          <h3>Planned Deadlock Implementations for Stage 4</h3>
+          <p>Core algorithmic foundations scheduled for development in Stage 4.</p>
+        </div>
+
+        <div class="features-specs-grid">
+          <div class="spec-card">
+            <h4><span>&#9670;</span> Banker's Algorithm</h4>
+            <p>Execution of safety algorithms and resource-request simulation with step-by-step vector arithmetic.</p>
+          </div>
+          <div class="spec-card">
+            <h4><span>&#9670;</span> Dynamic Resource Allocation Graph</h4>
+            <p>Canvas-based interactive graph rendering processes and resources with live edge creation and deletion.</p>
+          </div>
+          <div class="spec-card">
+            <h4><span>&#9670;</span> Cycle Detection Algorithm</h4>
+            <p>Graph cycle detection identifying circular wait conditions in single and multi-instance resource systems.</p>
+          </div>
+          <div class="spec-card">
+            <h4><span>&#9670;</span> Deadlock Recovery Engine</h4>
+            <p>Interactive simulation of process termination (abort all vs abort one-by-one) and resource preemption with rollback.</p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="page-footer">
+      <div>
+        <strong>OS-Vision</strong> &mdash; Deadlock Management Simulator Placeholder
+      </div>
+      <div>
+        Capstone Project &bull; Stage 1 Foundation Active &bull; <a href="/">Return to Dashboard</a>
+      </div>
+    </footer>
+
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script src="/js/modules.js"></script>
+</body>
+</html>

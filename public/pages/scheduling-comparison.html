@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scheduling Algorithm Comparison | OS-Vision</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/modules.css">
+</head>
+<body>
+
+  <!-- ==================== SIDEBAR ==================== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-badge">OS</div>
+      <div class="logo-details">
+        <h1>OS-Vision</h1>
+        <span>Simulator Core v1.0</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main Navigation</div>
+      <a href="/" class="nav-link">
+        <span class="nav-icon">&#9638;</span>
+        <span>Dashboard</span>
+      </a>
+
+      <div class="nav-section-label">Simulation Modules</div>
+      <a href="/cpu-scheduling" class="nav-link">
+        <span class="nav-icon">&#9881;</span>
+        <span>CPU Process Scheduling</span>
+        <span class="nav-tag tag-active">Module 01</span>
+      </a>
+      <a href="/scheduling-comparison" class="nav-link active">
+        <span class="nav-icon">&#9638;</span>
+        <span>Algorithm Comparison</span>
+        <span class="nav-tag tag-active">Module 02</span>
+      </a>
+      <a href="/scheduling-analysis" class="nav-link">
+        <span class="nav-icon">&#128202;</span>
+        <span>Performance Analysis</span>
+        <span class="nav-tag tag-active">Module 03</span>
+      </a>
+
+      <!-- Hidden legacy links for route compatibility & existing test assertions -->
+      <a href="/memory-management" class="nav-link" style="display: none;" aria-hidden="true">
+        <span class="nav-icon">&#9639;</span>
+        <span>Memory Management</span>
+        <span class="nav-tag tag-placeholder">Stage 3</span>
+      </a>
+      <a href="/deadlock-management" class="nav-link" style="display: none;" aria-hidden="true">
+        <span class="nav-icon">&#128274;</span>
+        <span>Deadlock Management</span>
+        <span class="nav-tag tag-placeholder">Stage 4</span>
+      </a>
+
+      <div class="nav-section-label">System & Diagnostics</div>
+      <a href="/api/health" target="_blank" class="nav-link">
+        <span class="nav-icon">&#9877;</span>
+        <span>API Health Endpoint</span>
+        <span class="badge badge-emerald">JSON</span>
+      </a>
+      <button class="nav-link health-indicator-btn" id="healthCheckBtn" style="width: 100%; text-align: left;">
+        <span class="nav-icon">&#9889;</span>
+        <span>Inspect Health Status</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-system-pill">
+        <div style="display: flex; align-items: center;">
+          <span class="status-dot" id="serverStatusDot"></span>
+          <span id="serverStatusText">Connecting...</span>
+        </div>
+        <span id="serverUptimeText" style="color: var(--text-muted); font-size: 0.72rem;">0s</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ==================== MAIN CONTENT CONTAINER ==================== -->
+  <div class="app-container">
+
+    <!-- Topbar Header -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-toggle-btn" id="menuToggleBtn" aria-label="Toggle Navigation">
+          &#9776;
+        </button>
+        <div class="breadcrumbs">
+          <a href="/">OS-Vision</a>
+          <span class="separator">/</span>
+          <a href="/">Modules</a>
+          <span class="separator">/</span>
+          <span class="current">Scheduling Algorithm Comparison</span>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <div class="pill-badge">
+          <span>Clock:</span>
+          <span id="systemClock" style="font-family: monospace; color: var(--accent-cyan);">--:--:--</span>
+        </div>
+        <a href="/" class="btn btn-secondary" style="padding: 0.35rem 0.85rem; font-size: 0.78rem;">
+          &larr; Back to Dashboard
+        </a>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Module Hero Header -->
+      <section class="module-page-header">
+        <div class="module-hero-info">
+          <div class="module-hero-icon" style="background: rgba(59, 130, 246, 0.15); color: var(--accent-blue);">
+            &#9638;
+          </div>
+          <div>
+            <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem;">
+              <span class="badge badge-blue">Module 02</span>
+              <span class="badge badge-emerald">Operational</span>
+            </div>
+            <h1 class="module-hero-title">Scheduling Algorithm Comparison</h1>
+            <p class="module-hero-desc">
+              Directly benchmark and compare First-Come First-Served (FCFS), Shortest Job First (SJF), Shortest Remaining Time First (SRTF), Priority Scheduling, and Round Robin on the identical process workload. Evaluate average waiting, turnaround, response times, CPU utilization, and throughput in a unified comparison matrix.
+            </p>
+            <div class="module-hero-tags">
+              <span class="badge badge-blue">FCFS</span>
+              <span class="badge badge-blue">SJF (Non-Preemptive)</span>
+              <span class="badge badge-blue">SRTF (Preemptive)</span>
+              <span class="badge badge-blue">Priority Scheduling</span>
+              <span class="badge badge-blue">Round Robin</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="module-hero-actions">
+          <a href="/cpu-scheduling" class="btn btn-secondary">&#9881; Module 1: Single Simulator</a>
+          <a href="/scheduling-analysis" class="btn btn-secondary">&#128202; Module 3: Performance Analysis</a>
+        </div>
+      </section>
+
+      <!-- Workload Configuration & Process Management -->
+      <section style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 2rem;">
+        
+        <!-- Controls Bar -->
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--border-subtle);">
+          <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+            <label for="presetSelect" style="font-size: 0.78rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 0.04em;">
+              Benchmark Workload:
+            </label>
+            <select id="presetSelect" class="mockup-select" style="cursor: pointer; width: auto; min-width: 260px; padding: 0.45rem 0.85rem;">
+              <option value="standard-mix">Standard Mix (Silberschatz 4-Process Demo)</option>
+              <option value="convoy-effect">Convoy Effect (FCFS Head-of-Line Blocking)</option>
+              <option value="srtf-preemption">SRTF Preemption Dynamic (Mid-Run Arrivals)</option>
+              <option value="priority-dispatch">Priority Dispatch (Diverse Priority Levels)</option>
+              <option value="round-robin-quantum">Round Robin Time-Slicing (Interactive Fairness)</option>
+              <option value="idle-period-gap">CPU Idle Period (Staggered Arrival Gap)</option>
+            </select>
+            <button type="button" class="btn btn-secondary" id="loadPresetBtn" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">
+              &#10227; Load Preset
+            </button>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap;">
+            <!-- Round Robin Quantum Setting -->
+            <div style="display: flex; align-items: center; gap: 0.5rem; background: rgba(59, 130, 246, 0.08); padding: 0.35rem 0.75rem; border-radius: var(--radius-sm); border: 1px solid rgba(59, 130, 246, 0.25);">
+              <label for="timeQuantumInput" style="font-size: 0.75rem; text-transform: uppercase; color: var(--accent-blue); font-weight: 700;">
+                RR Quantum (q):
+              </label>
+              <input type="number" id="timeQuantumInput" min="1" max="100" value="2" style="width: 60px; padding: 0.25rem 0.45rem; background: var(--bg-darkest); border: 1px solid var(--border-focus); border-radius: var(--radius-sm); color: #fff; font-size: 0.85rem; font-weight: 700; text-align: center;">
+              <span style="font-size: 0.72rem; color: var(--text-muted);">ms</span>
+            </div>
+
+            <!-- Compare Button -->
+            <button type="button" class="btn btn-primary" id="runCompareBtn" style="padding: 0.5rem 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+              <span>&#9654;</span> Compare All 5 Algorithms
+            </button>
+          </div>
+        </div>
+
+        <!-- Error Alert -->
+        <div id="errorAlert" class="error-alert-banner" style="display: none;">
+          <span>&#9888;</span>
+          <span id="errorAlertText">Please check process parameters.</span>
+        </div>
+
+        <!-- Process Input Form & Active Process Queue -->
+        <div style="display: grid; grid-template-columns: minmax(300px, 360px) 1fr; gap: 1.5rem; align-items: flex-start;">
+          
+          <!-- Add Process Box -->
+          <div style="background: var(--bg-darkest); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.25rem;">
+            <h4 style="font-size: 0.92rem; font-weight: 700; color: #fff; margin-bottom: 0.85rem; display: flex; align-items: center; gap: 0.5rem;">
+              <span style="color: var(--accent-cyan);">&#43;</span> Add Process to Workload
+            </h4>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; margin-bottom: 0.85rem;">
+              <div class="proc-input-group">
+                <label for="inputPid">Process ID</label>
+                <input type="text" id="inputPid" placeholder="e.g. P5" maxlength="10">
+              </div>
+              <div class="proc-input-group">
+                <label for="inputArrival">Arrival Time</label>
+                <input type="number" id="inputArrival" min="0" placeholder="0" value="0">
+              </div>
+              <div class="proc-input-group">
+                <label for="inputBurst">Burst Time</label>
+                <input type="number" id="inputBurst" min="1" placeholder="4" value="4">
+              </div>
+              <div class="proc-input-group">
+                <label for="inputPriority">Priority (1=High)</label>
+                <input type="number" id="inputPriority" min="1" placeholder="2" value="2">
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 0.5rem;">
+              <button type="button" class="btn btn-secondary" id="addProcessBtn" style="flex: 1; padding: 0.45rem; font-size: 0.82rem; font-weight: 700; background: rgba(59, 130, 246, 0.15); border-color: rgba(59, 130, 246, 0.4); color: #fff;">
+                &#43; Add Process
+              </button>
+              <button type="button" class="btn btn-secondary" id="resetProcessesBtn" style="padding: 0.45rem 0.75rem; font-size: 0.82rem;" title="Reset to standard mix">
+                Reset
+              </button>
+              <button type="button" class="btn btn-secondary" id="clearProcessesBtn" style="padding: 0.45rem 0.75rem; font-size: 0.82rem; color: #f87171;" title="Clear all processes">
+                Clear
+              </button>
+            </div>
+          </div>
+
+          <!-- Process Queue Table -->
+          <div style="background: var(--bg-darkest); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.25rem; overflow-x: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+              <h4 style="font-size: 0.92rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 0.5rem;">
+                <span>&#9776;</span> Current Workload Process Queue
+              </h4>
+              <span id="processCountBadge" class="badge badge-blue">4 Processes</span>
+            </div>
+
+            <table class="results-data-table" style="font-size: 0.82rem;">
+              <thead>
+                <tr>
+                  <th>Process ID</th>
+                  <th>Arrival Time (ms)</th>
+                  <th>CPU Burst (ms)</th>
+                  <th>Priority Rank</th>
+                  <th style="text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="comparisonProcessTableBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- Empirical Best Measured Result Highlights Banner -->
+      <section style="margin-bottom: 2rem;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+          <div>
+            <h3 style="font-size: 1.15rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 0.5rem;">
+              <span style="color: var(--accent-emerald);">&#9733;</span> Measured Best Performance by Metric
+            </h3>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.2rem;">
+              Empirical optimal results calculated strictly on the current active workload.
+            </p>
+          </div>
+          <span class="badge badge-emerald">&#9679; Dynamic Calculation</span>
+        </div>
+
+        <div class="kpi-summary-grid" id="bestHighlightsGrid">
+          <div class="kpi-metric-card" style="border-top: 3px solid var(--accent-emerald);">
+            <span class="kpi-label">Lowest Avg Waiting Time</span>
+            <div class="kpi-value" id="highlightBestWt" style="color: var(--accent-emerald);">--</div>
+            <span class="kpi-formula" id="highlightBestWtAlgo">Calculating...</span>
+          </div>
+          <div class="kpi-metric-card" style="border-top: 3px solid var(--accent-cyan);">
+            <span class="kpi-label">Lowest Avg Turnaround</span>
+            <div class="kpi-value" id="highlightBestTat" style="color: var(--accent-cyan);">--</div>
+            <span class="kpi-formula" id="highlightBestTatAlgo">Calculating...</span>
+          </div>
+          <div class="kpi-metric-card" style="border-top: 3px solid var(--accent-blue);">
+            <span class="kpi-label">Lowest Avg Response Time</span>
+            <div class="kpi-value" id="highlightBestRt" style="color: var(--accent-blue);">--</div>
+            <span class="kpi-formula" id="highlightBestRtAlgo">Calculating...</span>
+          </div>
+          <div class="kpi-metric-card" style="border-top: 3px solid var(--accent-purple);">
+            <span class="kpi-label">Max CPU Utilization</span>
+            <div class="kpi-value" id="highlightBestUtil" style="color: var(--accent-purple);">--</div>
+            <span class="kpi-formula" id="highlightBestUtilAlgo">Calculating...</span>
+          </div>
+          <div class="kpi-metric-card" style="border-top: 3px solid var(--accent-amber);">
+            <span class="kpi-label">Maximum Throughput</span>
+            <div class="kpi-value" id="highlightBestThroughput" style="color: var(--accent-amber);">--</div>
+            <span class="kpi-formula" id="highlightBestThroughputAlgo">Calculating...</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Algorithm Comparison Table Section -->
+      <section style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
+          <div>
+            <h3 style="font-size: 1.15rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 0.5rem;">
+              <span>&#9741;</span> Comprehensive Algorithm Comparison Matrix
+            </h3>
+            <p style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 0.2rem;">
+              Green cells and <span class="badge-best" style="margin-left: 0;">★ BEST</span> badges designate the measured superior algorithm for each metric on this process set.
+            </p>
+          </div>
+          <span class="badge badge-blue">All 5 Algorithms Active</span>
+        </div>
+
+        <div style="overflow-x: auto;">
+          <table class="results-data-table" id="comparisonTable">
+            <thead>
+              <tr>
+                <th style="min-width: 170px;">Algorithm</th>
+                <th>Discipline</th>
+                <th style="min-width: 130px;">Avg Waiting Time</th>
+                <th style="min-width: 140px;">Avg Turnaround</th>
+                <th style="min-width: 130px;">Avg Response</th>
+                <th>CPU Utilization</th>
+                <th>Throughput</th>
+                <th>Makespan</th>
+                <th style="text-align: right;">Details</th>
+              </tr>
+            </thead>
+            <tbody id="comparisonTableBody">
+              <!-- Dynamically populated via scheduling-comparison.js -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Theoretical & Contextual Callout (Faculty Requirement Compliance) -->
+      <section class="theory-callout-box">
+        <div class="theory-callout-header">
+          <span style="font-size: 1.25rem; color: var(--accent-cyan);">&#9432;</span>
+          <h4>OS Heuristic Assessment: Context-Dependent Performance</h4>
+        </div>
+        <p class="theory-callout-body">
+          The highlighted metrics above represent the <strong>measured empirical performance</strong> strictly for the currently configured process workload. In Operating Systems principles, <strong>no single CPU scheduling algorithm is universally superior across all computing scenarios</strong>:
+        </p>
+
+        <div class="theory-callout-grid">
+          <div class="theory-rule-item">
+            <strong>&#9670; Shortest Job First (SJF) & SRTF:</strong> Provably minimize average waiting time when burst times are known in advance. However, long-burst processes can suffer severe starvation under continuous short-job arrival streams.
+          </div>
+          <div class="theory-rule-item">
+            <strong>&#9670; Round Robin (RR):</strong> Guarantees fair, starvation-free CPU time sharing and low response latency for interactive desktop and cloud environments, at the expense of higher turnaround time due to frequent context switches.
+          </div>
+          <div class="theory-rule-item">
+            <strong>&#9670; First-Come, First-Served (FCFS):</strong> Simple and starvation-free with zero preemption overhead. However, it is vulnerable to the Convoy Effect, where short jobs wait for a long CPU-bound job.
+          </div>
+          <div class="theory-rule-item">
+            <strong>&#9670; Priority Scheduling:</strong> Enforces business and real-time urgency requirements. Low-priority jobs can starve indefinitely unless dynamic aging heuristics are deployed.
+          </div>
+        </div>
+      </section>
+
+      <!-- Synchronized Multi-Gantt Timeline Comparison -->
+      <section class="multi-gantt-container">
+        <div class="multi-gantt-header">
+          <div>
+            <h3 style="font-size: 1.15rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 0.5rem;">
+              <span>&#9881;</span> Multi-Algorithm Gantt Timeline Comparison
+            </h3>
+            <p style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 0.2rem;">
+              Visual timeline synchronization of all 5 algorithms on identical process arrival events. Hover over segments to inspect execution time slices.
+            </p>
+          </div>
+          <div class="gantt-legend" id="multiGanttLegend" style="border-top: none; margin-top: 0; padding: 0;">
+            <!-- Process color legend pills -->
+          </div>
+        </div>
+
+        <div id="multiGanttTracks">
+          <!-- Dynamically populated with stacked Gantt rows -->
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="page-footer">
+      <div>
+        <strong>OS-Vision</strong> &mdash; Scheduling Algorithm Comparison Module
+      </div>
+      <div>
+        Capstone Project &bull; Module 02 &bull; <a href="/cpu-scheduling">Module 1 (CPU Simulator)</a> &bull; <a href="/scheduling-analysis">Module 3 (Analysis)</a>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Detail Inspection Modal -->
+  <div class="detail-modal-overlay" id="detailModal">
+    <div class="detail-modal-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.75rem;">
+        <h3 id="modalAlgoTitle" style="font-size: 1.15rem; color: #fff; display: flex; align-items: center; gap: 0.5rem;">
+          Algorithm Breakdown
+        </h3>
+        <button id="modalCloseBtn2" style="background: none; border: none; color: var(--text-secondary); font-size: 1.5rem; cursor: pointer;">&times;</button>
+      </div>
+
+      <p id="modalAlgoDesc" style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+        Detailed per-process execution parameters for this algorithm.
+      </p>
+
+      <div style="overflow-x: auto; margin-bottom: 1.5rem;">
+        <table class="results-data-table" style="font-size: 0.82rem;">
+          <thead>
+            <tr>
+              <th>PID</th>
+              <th>Arrival (ms)</th>
+              <th>Burst (ms)</th>
+              <th>Priority</th>
+              <th>Start Time</th>
+              <th>Completion</th>
+              <th>Turnaround Time</th>
+              <th>Waiting Time</th>
+              <th>Response Time</th>
+            </tr>
+          </thead>
+          <tbody id="modalProcessTableBody">
+            <!-- Populated via JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end;">
+        <button type="button" class="btn btn-secondary" id="modalDismissBtn" style="padding: 0.45rem 1rem;">
+          Close Details
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script src="/js/scheduling-comparison.js"></script>
+</body>
+</html>

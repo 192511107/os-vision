@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CPU Scheduling Simulator | OS-Vision</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/modules.css">
+</head>
+<body>
+
+  <!-- ==================== SIDEBAR ==================== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-badge">OS</div>
+      <div class="logo-details">
+        <h1>OS-Vision</h1>
+        <span>Simulator Core v1.0</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main Navigation</div>
+      <a href="/" class="nav-link">
+        <span class="nav-icon">&#9638;</span>
+        <span>Dashboard</span>
+      </a>
+
+      <div class="nav-section-label">Simulation Modules</div>
+      <a href="/cpu-scheduling" class="nav-link active">
+        <span class="nav-icon">&#9881;</span>
+        <span>CPU Process Scheduling</span>
+        <span class="nav-tag tag-active">Module 01</span>
+      </a>
+      <a href="/scheduling-comparison" class="nav-link">
+        <span class="nav-icon">&#9638;</span>
+        <span>Algorithm Comparison</span>
+        <span class="nav-tag tag-active">Module 02</span>
+      </a>
+      <a href="/scheduling-analysis" class="nav-link">
+        <span class="nav-icon">&#128202;</span>
+        <span>Performance Analysis</span>
+        <span class="nav-tag tag-active">Module 03</span>
+      </a>
+
+      <!-- Hidden legacy links for route compatibility & existing test assertions -->
+      <a href="/memory-management" class="nav-link" style="display: none;" aria-hidden="true">
+        <span class="nav-icon">&#9639;</span>
+        <span>Memory Management</span>
+        <span class="nav-tag tag-placeholder">Stage 3</span>
+      </a>
+      <a href="/deadlock-management" class="nav-link" style="display: none;" aria-hidden="true">
+        <span class="nav-icon">&#128274;</span>
+        <span>Deadlock Management</span>
+        <span class="nav-tag tag-placeholder">Stage 4</span>
+      </a>
+
+      <div class="nav-section-label">System & Diagnostics</div>
+      <a href="/api/health" target="_blank" class="nav-link">
+        <span class="nav-icon">&#9877;</span>
+        <span>API Health Endpoint</span>
+        <span class="badge badge-emerald">JSON</span>
+      </a>
+      <button class="nav-link health-indicator-btn" id="healthCheckBtn" style="width: 100%; text-align: left;">
+        <span class="nav-icon">&#9889;</span>
+        <span>Inspect Health Status</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-system-pill">
+        <div style="display: flex; align-items: center;">
+          <span class="status-dot" id="serverStatusDot"></span>
+          <span id="serverStatusText">Connecting...</span>
+        </div>
+        <span id="serverUptimeText" style="color: var(--text-muted); font-size: 0.72rem;">0s</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ==================== MAIN CONTENT CONTAINER ==================== -->
+  <div class="app-container">
+
+    <!-- Topbar Header -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-toggle-btn" id="menuToggleBtn" aria-label="Toggle Navigation">
+          &#9776;
+        </button>
+        <div class="breadcrumbs">
+          <a href="/">OS-Vision</a>
+          <span class="separator">/</span>
+          <a href="/">Modules</a>
+          <span class="separator">/</span>
+          <span class="current">CPU Scheduling</span>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <div class="pill-badge">
+          <span>Clock:</span>
+          <span id="systemClock" style="font-family: monospace; color: var(--accent-cyan);">--:--:--</span>
+        </div>
+        <a href="/" class="btn btn-secondary" style="padding: 0.35rem 0.85rem; font-size: 0.78rem;">
+          &larr; Back to Dashboard
+        </a>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Module Hero Header -->
+      <section class="module-page-header">
+        <div class="module-hero-info">
+          <div class="module-hero-icon" style="background: rgba(6, 182, 212, 0.15); color: var(--accent-cyan);">
+            &#9881;
+          </div>
+          <div>
+            <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem;">
+              <span class="badge badge-cyan">Module 01</span>
+              <span class="badge badge-emerald">Stage 2 Operational</span>
+            </div>
+            <h1 class="module-hero-title">CPU Scheduling Simulator</h1>
+            <p class="module-hero-desc">
+              Comprehensive simulator for evaluating preemptive and non-preemptive process dispatching algorithms. 
+              Visualize timelines via interactive Gantt charts and compute completion, turnaround, waiting, and response times in real time.
+            </p>
+            <div class="module-hero-tags">
+              <span class="badge badge-cyan">First-Come, First-Served</span>
+              <span class="badge badge-cyan">Shortest Job First</span>
+              <span class="badge badge-cyan">Shortest Remaining Time First</span>
+              <span class="badge badge-cyan">Round Robin</span>
+              <span class="badge badge-cyan">Priority Scheduling</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="module-hero-actions">
+          <a href="/" class="btn btn-secondary">&larr; Return to Dashboard</a>
+        </div>
+      </section>
+
+      <!-- Algorithm Selector Tab Bar -->
+      <section style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; margin-bottom: 1.75rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.6rem;">
+          <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 0.05em;">
+            Select Algorithm Specification:
+          </div>
+          <div id="quantumGroup" style="display: none; align-items: center; gap: 0.5rem; background: rgba(6, 182, 212, 0.08); padding: 0.3rem 0.65rem; border-radius: var(--radius-sm); border: 1px solid rgba(6, 182, 212, 0.25);">
+            <label for="timeQuantumInput" style="font-size: 0.75rem; text-transform: uppercase; color: var(--accent-cyan); font-weight: 700;">
+              Time Quantum (q):
+            </label>
+            <input type="number" id="timeQuantumInput" min="1" max="100" value="2" style="width: 65px; padding: 0.3rem 0.5rem; background: var(--bg-darkest); border: 1px solid var(--border-focus); border-radius: var(--radius-sm); color: #fff; font-size: 0.85rem; font-weight: 700;">
+            <span style="font-size: 0.72rem; color: var(--text-muted);">ms</span>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 1.25rem;">
+          <button type="button" class="btn btn-secondary algo-tab active" data-algo="fcfs" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">FCFS</button>
+          <button type="button" class="btn btn-secondary algo-tab" data-algo="sjf" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">SJF (Non-Preemptive)</button>
+          <button type="button" class="btn btn-secondary algo-tab" data-algo="srtf" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">SRTF (Preemptive)</button>
+          <button type="button" class="btn btn-secondary algo-tab" data-algo="rr" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">Round Robin</button>
+          <button type="button" class="btn btn-secondary algo-tab" data-algo="priority" style="padding: 0.45rem 0.9rem; font-size: 0.82rem;">Priority</button>
+        </div>
+
+        <div id="algoInfoContainer">
+          <div style="border-left: 3px solid var(--accent-cyan); padding-left: 1rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
+              <h4 style="color: #fff; font-size: 1rem; font-weight: 700;">First-Come, First-Served (FCFS)</h4>
+              <span class="badge badge-cyan">Non-Preemptive</span>
+              <span class="badge badge-amber">O(N)</span>
+            </div>
+            <p style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.5;">
+              Executes processes strictly in order of their arrival timestamp. Straightforward implementation, but vulnerable to the convoy effect where short tasks wait behind lengthy ones.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Error Alert Banner -->
+      <div id="errorAlert" class="error-alert-banner" style="display: none;">
+        <span style="font-size: 1.1rem; flex-shrink: 0;">&#9888;</span>
+        <span id="errorAlertText" style="flex: 1;"></span>
+      </div>
+
+      <!-- Main Interactive Simulation Workspace -->
+      <section class="simulator-workspace-preview">
+
+        <!-- Left Column: Process Queue Configuration Panel -->
+        <div class="workspace-panel">
+          <div class="panel-title">
+            <span>Process Queue Configuration</span>
+            <span class="badge badge-cyan">Interactive Control</span>
+          </div>
+
+          <!-- Sample Scenario Presets Toolbar -->
+          <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 1.1rem; background: var(--bg-card-subtle); padding: 0.75rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 190px;">
+              <label for="presetSelect" style="display: block; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.25rem;">
+                Sample Preset Workloads:
+              </label>
+              <select id="presetSelect" style="width: 100%; padding: 0.45rem 0.65rem; background-color: var(--bg-darkest); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); color: var(--text-main); font-size: 0.82rem; outline: none;">
+                <option value="">-- Choose Sample Preset Scenario --</option>
+              </select>
+            </div>
+            <div style="display: flex; align-items: flex-end;">
+              <button type="button" id="loadSampleBtn" class="btn btn-secondary" style="height: 34px; padding: 0.45rem 0.85rem; font-size: 0.8rem; white-space: nowrap;">
+                &#128194; Load Sample Data
+              </button>
+            </div>
+          </div>
+
+          <!-- Process Input Form -->
+          <div class="proc-input-container">
+            <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--accent-cyan); letter-spacing: 0.05em; margin-bottom: 0.75rem;">
+              New Process Parameters
+            </div>
+            <div class="proc-inputs-row">
+              <div class="proc-input-group">
+                <label for="inputPid">Process ID</label>
+                <input type="text" id="inputPid" placeholder="e.g. P5">
+              </div>
+              <div class="proc-input-group">
+                <label for="inputArrival">Arrival Time (ms)</label>
+                <input type="number" id="inputArrival" min="0" placeholder="0">
+              </div>
+              <div class="proc-input-group">
+                <label for="inputBurst">Burst Time (ms)</label>
+                <input type="number" id="inputBurst" min="1" placeholder="e.g. 4">
+              </div>
+              <div class="proc-input-group">
+                <label for="inputPriority">Priority</label>
+                <input type="number" id="inputPriority" placeholder="1">
+              </div>
+            </div>
+            <div style="display: flex; gap: 0.6rem; align-items: center;">
+              <button type="button" id="addProcessBtn" class="btn btn-primary" style="padding: 0.55rem 1.4rem; font-size: 0.85rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.4rem; box-shadow: 0 2px 8px var(--accent-blue-glow);">
+                + Add Process
+              </button>
+              <button type="button" id="cancelEditBtn" class="btn btn-secondary" style="padding: 0.55rem 1.1rem; font-size: 0.85rem; display: none;">
+                Cancel
+              </button>
+            </div>
+          </div>
+
+          <!-- Queue Action Toolbar -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin: 0.85rem 0 0.5rem 0; flex-wrap: wrap; gap: 0.5rem;">
+            <div style="font-size: 0.88rem; font-weight: 700; color: var(--text-main);">
+              Configured Process Queue
+            </div>
+            <div style="display: flex; gap: 0.4rem; align-items: center;">
+              <button type="button" id="clearProcessesBtn" class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;" title="Clear all processes from queue">
+                &#128465; Clear
+              </button>
+              <button type="button" id="resetProcessesBtn" class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;" title="Reset back to standard 4-process set">
+                &#8634; Reset
+              </button>
+              <button type="button" id="runSimulationBtn" class="btn btn-primary" style="padding: 0.35rem 0.95rem; font-size: 0.78rem;">
+                &#9654; Run Simulation
+              </button>
+            </div>
+          </div>
+
+          <!-- Configured Process Table -->
+          <div style="overflow-x: auto; max-height: 290px; overflow-y: auto; border: 1px solid var(--border-subtle); border-radius: var(--radius-md);">
+            <table class="mockup-table" style="margin-top: 0;">
+              <thead>
+                <tr>
+                  <th>PID</th>
+                  <th>Arrival</th>
+                  <th>Burst</th>
+                  <th>Priority</th>
+                  <th style="text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="processTableBody">
+                <!-- Dynamically populated by cpu-scheduling.js -->
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+
+        <!-- Right Column: Interactive Gantt Chart & KPI Metrics Visualizer -->
+        <div class="workspace-panel">
+          <div class="panel-title">
+            <span>Gantt Timeline Visualization</span>
+            <span class="badge badge-emerald">Real-Time Schedule</span>
+          </div>
+
+          <!-- Gantt Chart Container -->
+          <div class="gantt-chart-wrapper">
+            <div id="ganttChartCanvas">
+              <!-- Dynamically rendered Gantt segments -->
+            </div>
+            <div id="ganttTimelineMarkers">
+              <!-- Dynamically positioned timeline tick timestamps -->
+            </div>
+            <div id="ganttLegend" class="gantt-legend">
+              <!-- Color legend for processes and idle slots -->
+            </div>
+          </div>
+
+          <!-- Performance KPIs Preview -->
+          <div class="panel-title" style="margin-top: 0.85rem; margin-bottom: 0.25rem;">
+            <span>Performance Analytics & System KPIs</span>
+          </div>
+
+          <div class="kpi-summary-grid">
+            <div class="kpi-metric-card">
+              <div class="kpi-label">Avg Turnaround Time</div>
+              <div class="kpi-value" id="metricAvgTat" style="color: var(--accent-cyan);">-- ms</div>
+              <div class="kpi-formula">TAT = CT &minus; AT</div>
+            </div>
+            <div class="kpi-metric-card">
+              <div class="kpi-label">Avg Waiting Time</div>
+              <div class="kpi-value" id="metricAvgWt" style="color: var(--accent-emerald);">-- ms</div>
+              <div class="kpi-formula">WT = TAT &minus; BT</div>
+            </div>
+            <div class="kpi-metric-card">
+              <div class="kpi-label">Avg Response Time</div>
+              <div class="kpi-value" id="metricAvgRt" style="color: var(--accent-purple);">-- ms</div>
+              <div class="kpi-formula">RT = First Run &minus; AT</div>
+            </div>
+            <div class="kpi-metric-card">
+              <div class="kpi-label">CPU Utilization</div>
+              <div class="kpi-value" id="metricCpuUtil" style="color: var(--accent-amber);">--%</div>
+              <div class="kpi-formula">(Busy / Total) &times; 100</div>
+            </div>
+            <div class="kpi-metric-card">
+              <div class="kpi-label">Throughput</div>
+              <div class="kpi-value" id="metricThroughput" style="color: #fff;">-- /ms</div>
+              <div class="kpi-formula">N / Total Time</div>
+            </div>
+            <div class="kpi-metric-card">
+              <div class="kpi-label">Schedule Length</div>
+              <div class="kpi-value" id="scheduleLengthText" style="color: var(--text-main);">-- ms</div>
+              <div class="kpi-formula">Max Completion Time</div>
+            </div>
+            <div class="kpi-metric-card">
+              <div class="kpi-label">CPU Idle Duration</div>
+              <div class="kpi-value" id="idleTimeText" style="color: var(--text-muted);">-- ms</div>
+              <div class="kpi-formula">Total &minus; Busy Time</div>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- Detailed Process Execution Results Table Section -->
+      <section style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 2.5rem;">
+        <div class="panel-title" style="margin-bottom: 1rem;">
+          <div>
+            <h3 style="font-size: 1.15rem; color: #fff; margin-bottom: 0.25rem;">Detailed Process Execution Metrics</h3>
+            <p style="font-size: 0.82rem; color: var(--text-secondary); margin: 0;">
+              Computed per-process scheduling timestamps, completion times, turnaround latency, and waiting times.
+            </p>
+          </div>
+        </div>
+
+        <div style="overflow-x: auto;">
+          <table class="results-data-table">
+            <thead>
+              <tr>
+                <th>Process</th>
+                <th>Arrival (AT)</th>
+                <th>Burst (BT)</th>
+                <th>Priority</th>
+                <th>Completion (CT)</th>
+                <th>Turnaround (TAT)</th>
+                <th>Waiting (WT)</th>
+                <th>Response (RT)</th>
+              </tr>
+            </thead>
+            <tbody id="resultsTableBody">
+              <!-- Dynamically populated with calculated execution metrics -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Supported Algorithms Specifications Grid -->
+      <section>
+        <div class="section-header">
+          <h3>Supported Scheduling Algorithms</h3>
+          <p>Theoretical foundations powering the interactive scheduling simulation engine.</p>
+        </div>
+
+        <div class="features-specs-grid">
+          <div class="spec-card">
+            <h4><span>&#9670;</span> First-Come, First-Served (FCFS)</h4>
+            <p>Non-preemptive dispatch strictly ordered by arrival timestamp. Serves as baseline for latency and demonstrates the convoy effect.</p>
+          </div>
+          <div class="spec-card">
+            <h4><span>&#9670;</span> Shortest Job First (SJF)</h4>
+            <p>Non-preemptive dispatch selecting the ready task with shortest burst time. Proven to yield minimal average waiting time.</p>
+          </div>
+          <div class="spec-card">
+            <h4><span>&#9670;</span> Shortest Remaining Time First (SRTF)</h4>
+            <p>Preemptive variant of SJF where newly arriving tasks with shorter burst times preempt the currently running process.</p>
+          </div>
+          <div class="spec-card">
+            <h4><span>&#9670;</span> Round Robin (RR)</h4>
+            <p>Preemptive circular queue scheduling allocating fixed time quantum slices to guarantee fair interactive responsiveness.</p>
+          </div>
+          <div class="spec-card">
+            <h4><span>&#9670;</span> Priority Scheduling</h4>
+            <p>Non-preemptive dispatch prioritized by urgency rank (lower numerical value indicates higher dispatch priority).</p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="page-footer">
+      <div>
+        <strong>OS-Vision</strong> &mdash; CPU Scheduling Simulator
+      </div>
+      <div>
+        Capstone Project &bull; Stage 2 Operational &bull; <a href="/">Return to Dashboard</a>
+      </div>
+    </footer>
+
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script src="/js/cpu-scheduling.js"></script>
+</body>
+</html>
